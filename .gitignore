@@ -37,3 +37,4 @@ inc/
 # build directors
 builds/
 outputs/
+syntax.cache
