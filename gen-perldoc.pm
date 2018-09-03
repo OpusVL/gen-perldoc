@@ -207,9 +207,7 @@ sub do_work {
         
         # THIS NEEDS TO GO ON THE VERY END AFTER POD_EXTRACTED
         my $vconcat = join('',$major,$minor);
-        warn "$vconcat vs ".$latest->{count};
         if ($vconcat > $latest->{count}) { 
-            warn "USING: $vconcat";
             $latest->{count} = $vconcat;
             $latest->{major} = $major;
             $latest->{minor} = $minor;
@@ -249,8 +247,9 @@ sub do_work {
         die;
     }
 
-    # Pass the highest versions to TT
+    # Pass the highest versions to TT and remove any me records
     $ttenv->{latest} = $latest;
+    delete $ttenv->{me};
 
     # Lets create an index.html in the output dir
     my $output = "";
