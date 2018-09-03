@@ -149,8 +149,8 @@ my $global = {
         '5_8_9' => 'exit 1',
         '5_10_0' => 'exit 1',
         '5_10_1' => 'exit 1',
-        default => 'exit 1',
-#        default => 'mkdir -p install && sh Configure -de -Dprefix="./install" && make && make install',
+#        default => 'exit 1',
+        default => 'mkdir -p magic && sh Configure -de -Dprefix="./magic" && make && make install',
     },
 };
 
