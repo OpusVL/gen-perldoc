@@ -150,7 +150,7 @@ my $global = {
         '5_10_0' => 'exit 1',
         '5_10_1' => 'exit 1',
 #        default => 'exit 1',
-        default => 'mkdir -p magic && sh Configure -de -Dprefix="./magic" && make && make install',
+        default => 'mkdir ../env && sh Configure -de -Dprefix="../env" && make && make install',
     },
 };
 
@@ -208,7 +208,7 @@ sub do_work {
         # THIS NEEDS TO GO ON THE VERY END AFTER POD_EXTRACTED
         my $vconcat = join('',$major,$minor);
         if ($vconcat > $latest->{count}) { 
-            $vconcat = $latest->{count};
+            $latest->{count} = $vconcat;
             $latest->{major} = $major;
             $latest->{minor} = $minor;
         }
