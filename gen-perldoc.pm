@@ -149,8 +149,8 @@ my $global = {
         '5_8_9' => 'exit 1',
         '5_10_0' => 'exit 1',
         '5_10_1' => 'exit 1',
-#        default => 'exit 1',
-        default => 'mkdir ../env && sh Configure -de -Dprefix="../env" && make && make install',
+        default => 'exit 1',
+#        default => 'mkdir ../env && sh Configure -de -Dprefix="../env" && make && make install',
     },
 };
 
@@ -207,7 +207,9 @@ sub do_work {
         
         # THIS NEEDS TO GO ON THE VERY END AFTER POD_EXTRACTED
         my $vconcat = join('',$major,$minor);
+        warn "$vconcat vs ".$latest->{count};
         if ($vconcat > $latest->{count}) { 
+            warn "USING: $vconcat";
             $latest->{count} = $vconcat;
             $latest->{major} = $major;
             $latest->{minor} = $minor;
@@ -224,6 +226,7 @@ sub do_work {
 
         # Add MAJOR/MINOR for 'me' to TT....
         $ttenv->{me} = $me;
+        $ttenv->{latest} = $latest;
 
         {
             my $output = "";
@@ -234,6 +237,9 @@ sub do_work {
             make_path($index_path);
             write_html($index_path."/index.html",$output);
         }
+
+        # Clear ME for the next pass
+        $me = {};
     }
 
 
