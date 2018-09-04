@@ -204,13 +204,13 @@ sub do_work {
                     my $pod_gen_path    = join('/',$Bin,'build-perldoc-html.pl');
                     open(my $fh,'>',$pod_extractor);
                     print $fh '#!/bin/sh'."\n";
-                    print $fh 'cd "'.$built_perl_dir.'"'." && ";
+                    print $fh 'cd "'.$built_perl_dir.'"'." && mkdir -p \"$path_to_output\" && ";
                     print $fh 'perl "'.$pod_gen_path.'" -output-path '.$path_to_output.' -perl '.$built_perl_bin;
                     close($fh);
                 }
 
                 my $extractor = join('/',$rp->{local_path},'extract_pod.sh');
-                print "Extracting pods\n";
+                print "Extracting pods for ($major,$minor)\n";
                 my @args = ('sh',$extractor);
                 my ($output, $exit) = capture_merged { system(@args) };
                 warn $output;
