@@ -204,7 +204,7 @@ sub do_work {
                     my $pod_gen_path    = join('/',$Bin,'build-perldoc-html.pl');
                     open(my $fh,'>',$pod_extractor);
                     print $fh '#!/bin/sh'."\n";
-                    print $fh 'cd "'.$built_perl_dir.'"'." && mkdir -p \"$path_to_output\" && ";
+                    print $fh 'cd "'.$built_perl_dir.'"'." && mkdir -p \"$path_to_output\"\n";
                     print $fh 'perl "'.$pod_gen_path.'" -output-path '.$path_to_output.' -perl '.$built_perl_bin;
                     close($fh);
                 }
@@ -213,8 +213,11 @@ sub do_work {
                 print "Extracting pods for ($major,$minor)\n";
                 my @args = ('sh',$extractor);
                 my ($output, $exit) = capture_merged { system(@args) };
-                warn $output;
+                print "Extracting Pods(Output): $output\n";
                 print "Extracting pods: $output\n";
+
+                # Forcing success
+                $output = 0;
 
                 if ($output) {
                     $global->{sources}->{$major}->{$minor} = set_state($rp,'podextract_bad');
@@ -524,7 +527,9 @@ sub require_source {
             $error = 0;
         }
         elsif ($state eq 'podextract_ok') {
+            print "Perl $major $minor, Complete\n";
             $rp->{state} = 'done';
+            $error = 0;
         }
         elsif ($state eq 'podextract_bad') {
             print "Perl $major $minor, Built but failed pod extract (retry)\n";
@@ -532,7 +537,7 @@ sub require_source {
             $error = 0;
         }
         else {
-            warn "$major 4minor state: $state";
+            warn "$major $minor state: $state (Force rebuild)";
             $error = 1;
         }
     }
