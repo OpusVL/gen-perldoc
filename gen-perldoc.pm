@@ -23,7 +23,6 @@ use Cwd;
 use Template;
 use Perldoc::Config;
 
-
 =head1 NAME
 
 OpusVL::PerlDoc
@@ -149,8 +148,8 @@ my $global = {
         '5_8_9' => 'exit 1',
         '5_10_0' => 'exit 1',
         '5_10_1' => 'exit 1',
-        default => 'exit 1',
-#        default => 'mkdir ../env && sh Configure -de -Dprefix="../env" && make && make install',
+#        default => 'exit 1',
+        default => 'mkdir -p ../env && sh Configure -de -Dprefix="../env" && make && make install',
     },
 };
 
@@ -194,9 +193,36 @@ sub do_work {
                 $global->{sources}->{$major}->{$minor} = build_perl($global->{sources}->{$major}->{$minor});
             }
             if ($global->{sources}->{$major}->{$minor}->{state} eq 'build_ok') {
-                # HERE SHOULD EXTRACT PODS AND RETURN STATE
-                $ttenv->{versions}->{$major}->{$minor} = $minor;
-                push @versions,[$major,$minor];
+                my $rp = $global->{sources}->{$major}->{$minor};
+
+                {
+                    # Write out the POD extractor script
+                    my $path_to_output  = join('/',$global->{config}->{'output-dir'},5,$major,$minor);
+                    my $pod_extractor   = join('/',$rp->{local_path},'extract_pod.sh');
+                    my $built_perl_dir  = join('/',$rp->{local_path},'env');
+                    my $built_perl_bin  = join('/',$built_perl_dir,'bin','perl');
+                    my $pod_gen_path    = join('/',$Bin,'build-perldoc-html.pl');
+                    open(my $fh,'>',$pod_extractor);
+                    print $fh '#!/bin/sh'."\n";
+                    print $fh 'cd "'.$built_perl_dir.'"'." && ";
+                    print $fh 'perl "'.$pod_gen_path.'" -output-path '.$path_to_output.' -perl '.$built_perl_bin;
+                    close($fh);
+                }
+
+                my $extractor = join('/',$rp->{local_path},'extract_pod.sh');
+                print "Extracting pods\n";
+                my @args = ('sh',$extractor);
+                my ($output, $exit) = capture_merged { system(@args) };
+                warn $output;
+                print "Extracting pods: $output\n";
+
+                if ($output) {
+                    $global->{sources}->{$major}->{$minor} = set_state($rp,'podextract_bad');
+                } else {
+                    $global->{sources}->{$major}->{$minor} = set_state($rp,'podextract_ok');
+                    $ttenv->{versions}->{$major}->{$minor} = $minor;
+                    push @versions,[$major,$minor];
+                }
             }
         }
     }
@@ -274,8 +300,8 @@ sub make_writable { chmod 0755, $File::Find::name }
 sub build_perl {
     my $rp = shift;
     
-    my $build_dir = join('/',$rp->{local_path},$rp->{rawfilename});
-    my $build_log = join('/',$rp->{local_path},'build.log');
+    my $build_dir       = join('/',$rp->{local_path},$rp->{rawfilename});
+    my $build_log       = join('/',$rp->{local_path},'build.log');
 
     # Fix broken sources (hopefully)
     find(\&make_writable, $build_dir);
@@ -497,9 +523,17 @@ sub require_source {
             $rp->{state} = 'extracted_ok';
             $error = 0;
         }
+        elsif ($state eq 'podextract_ok') {
+            $rp->{state} = 'done';
+        }
+        elsif ($state eq 'podextract_bad') {
+            print "Perl $major $minor, Built but failed pod extract (retry)\n";
+            $rp->{state} = 'build_ok';
+            $error = 0;
+        }
         else {
-            warn "Unknown state: $state";
-            die;
+            warn "$major 4minor state: $state";
+            $error = 1;
         }
     }
 

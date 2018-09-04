@@ -340,7 +340,6 @@ $function_data{path}        = '../' x $function_data{pagedepth};
 
 
 #--Create individual function pages----------------------------------------
-warn "FOREAVC";
 foreach my $function (Perldoc::Function::list()) {
   local $processing_state = 'functions';
   my $function_pod = Perldoc::Function::pod($function);
