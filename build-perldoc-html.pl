@@ -32,9 +32,9 @@ use constant TT_INCLUDE_PATH => "$Bin/templates";
 
 my %specifiers = (
   'output-path' => '=s',
-  'download'    => '!',
-  'pdf'         => '!',
   'perl'        => '=s',
+  'major'       => '=n',
+  'minor'       => '=n',
 );                  
 my %options;
 GetOptions( \%options, optionspec(%specifiers) );
@@ -154,6 +154,7 @@ foreach my $section (Perldoc::Section::list()) {
   $index_data{pageaddress} = "index-$section.html";
   $index_data{content_tt}  = 'section_index.tt';
   $index_data{module_az}   = \@module_az_links;
+  $index_data{options}     = \%options;
   
   foreach my $page (Perldoc::Section::pages($section)) {
     (my $page_link = $page) =~ s/::/\//g;

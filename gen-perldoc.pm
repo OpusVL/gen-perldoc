@@ -206,7 +206,7 @@ sub do_work {
                     open(my $fh,'>',$pod_extractor);
                     print $fh '#!/bin/sh'."\n";
                     print $fh 'cd "'.$built_perl_dir.'"'." && mkdir -p \"$path_to_output\"\n";
-                    print $fh 'perl "'.$pod_gen_path.'" -output-path '.$path_to_output.' -perl '.$built_perl_bin;
+                    print $fh 'perl "'.$pod_gen_path.'" -output-path '.$path_to_output.' -perl '.$built_perl_bin.' -major '.$major.' -minor '.$minor;
                     close($fh);
                 }
 
